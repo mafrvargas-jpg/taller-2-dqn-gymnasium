@@ -157,90 +157,165 @@ A partir de esta exploración se determinó que `LunarLander-v3` es adecuado par
 
 # 2. Implementación del agente DQN
 
-> **Esta sección corresponde a la Persona 2.**
-
 ## 2.1 Descripción general
 
-En esta sección se documentará la implementación del agente **Deep Q-Network (DQN)** utilizado para resolver el ambiente `LunarLander-v3`.
+Se implementó un agente Deep Q-Network (DQN) para resolver el ambiente `LunarLander-v3`.
 
-El agente deberá aprender una función de valor Q que permita seleccionar la acción más conveniente para cada estado observado.
+El agente utiliza una red neuronal para aproximar la función Q y seleccionar la acción con mayor valor esperado para cada estado. La implementación incorpora los componentes principales del algoritmo DQN:
+
+- Q-Network.
+- Target Network.
+- Replay Buffer.
+- Política epsilon-greedy.
+- Actualización mediante la ecuación de Bellman.
+- Optimizador Adam.
+
+El agente recibe como entrada el vector de estado de 8 variables y genera como salida 4 valores Q, uno por cada acción disponible en el ambiente.
 
 ## 2.2 Arquitectura de la red neuronal
 
-En esta sección se documentará la arquitectura de la red neuronal utilizada para aproximar la función Q.
+La arquitectura utilizada para aproximar la función Q fue:
 
-Se deberán especificar:
+~~~text
+Entrada: 8 variables
+        ↓
+Capa completamente conectada: 8 → 128
+        ↓
+ReLU
+        ↓
+Capa completamente conectada: 128 → 128
+        ↓
+ReLU
+        ↓
+Capa de salida: 128 → 4
+~~~
 
-- Dimensión de entrada.
-- Número de capas ocultas.
-- Número de neuronas por capa.
-- Funciones de activación.
-- Dimensión de salida.
-- Justificación de la arquitectura seleccionada.
+La red utiliza dos capas ocultas de 128 neuronas con funciones de activación ReLU. La capa de salida contiene 4 neuronas, correspondientes a las cuatro acciones disponibles en `LunarLander-v3`.
 
-La red deberá recibir las **8 variables de observación** del ambiente y generar **4 valores Q**, correspondientes a las cuatro acciones disponibles.
+Esta arquitectura permite trabajar con el vector de observaciones de baja dimensión del ambiente y proporciona suficiente capacidad para aproximar la función Q sin utilizar una red excesivamente compleja.
 
 ## 2.3 Replay Buffer
 
-En esta sección se documentará la implementación de la memoria de experiencias utilizada para almacenar las transiciones obtenidas durante la interacción con el ambiente.
+Se utilizó un Replay Buffer con capacidad para almacenar hasta 100.000 experiencias.
 
-Se deberá explicar:
+Cada experiencia contiene:
 
-- Qué información contiene cada experiencia.
-- Cómo se almacenan las experiencias.
-- Tamaño máximo de la memoria.
-- Cómo se realiza el muestreo de los minibatches.
+~~~text
+(estado, acción, recompensa, siguiente_estado, estado_terminal)
+~~~
+
+Durante el entrenamiento, las experiencias se almacenan en el buffer y posteriormente se seleccionan lotes aleatorios de 64 experiencias para actualizar la red.
+
+El uso de Replay Buffer permite reducir la correlación entre experiencias consecutivas y mejora la estabilidad del aprendizaje.
 
 ## 2.4 Política epsilon-greedy
 
-En esta sección se documentará la estrategia utilizada para equilibrar la exploración y explotación durante el entrenamiento del agente.
+La selección de acciones se realizó mediante una política epsilon-greedy.
 
-Se deberán explicar:
+Al inicio del entrenamiento se utilizó un valor de epsilon igual a 1.0, favoreciendo la exploración del ambiente. Durante el entrenamiento, epsilon disminuyó progresivamente hasta alcanzar un valor mínimo de 0.01.
 
-- Epsilon inicial.
-- Epsilon mínimo.
-- Estrategia de decaimiento.
-- Selección aleatoria de acciones durante la exploración.
-- Selección de la acción con mayor valor Q durante la explotación.
+De esta manera, el agente comenzó explorando diferentes acciones y progresivamente pasó a utilizar con mayor frecuencia las acciones que la red neuronal estimaba como más convenientes.
 
 ## 2.5 Target Network y actualización de la función Q
 
-En esta sección se documentará el uso de la red objetivo y el procedimiento utilizado para calcular los valores objetivo de la función Q.
+Se utilizaron dos redes neuronales:
 
-Se deberá explicar:
+- **Q-Network:** red principal que se actualiza durante el entrenamiento.
+- **Target Network:** red utilizada para calcular los valores objetivo.
 
-- Función de pérdida utilizada.
-- Cálculo del objetivo de Bellman.
-- Optimización de la red principal.
-- Frecuencia de actualización de la Target Network.
+La Target Network se actualizó cada 10 episodios copiando los pesos de la Q-Network.
 
-## 2.6 Flujo general del DQN
+Para calcular el valor objetivo se utilizó la ecuación de Bellman:
 
-Se deberá incluir una explicación o diagrama del flujo general del algoritmo:
-
-~~~
-Estado
-   ↓
-Selección de acción (epsilon-greedy)
-   ↓
-Interacción con el ambiente
-   ↓
-Recompensa + siguiente estado
-   ↓
-Replay Buffer
-   ↓
-Muestreo de experiencias
-   ↓
-Cálculo del objetivo de Bellman
-   ↓
-Actualización de la red Q
-   ↓
-Actualización de Target Network
-   ↓
-Siguiente interacción
+~~~text
+Q_target = recompensa + γ × max(Q_siguiente)
 ~~~
 
----
+cuando el episodio no había terminado.
+
+Para estados terminales, el valor futuro no se considera.
+
+El factor de descuento utilizado fue:
+
+~~~text
+γ = 0.99
+~~~
+
+La función de pérdida se calculó comparando los valores Q estimados por la Q-Network con los valores objetivo obtenidos mediante la ecuación de Bellman.
+
+## 2.6 Hiperparámetros utilizados
+
+Los principales hiperparámetros utilizados fueron:
+
+| Hiperparámetro | Valor |
+|---|---:|
+| Episodios de entrenamiento | 1.000 |
+| Learning rate | 0.001 |
+| Gamma | 0.99 |
+| Batch size | 64 |
+| Capacidad Replay Buffer | 100.000 |
+| Actualización Target Network | Cada 10 episodios |
+| Epsilon inicial | 1.0 |
+| Epsilon mínimo | 0.01 |
+
+Los valores fueron seleccionados buscando un equilibrio entre estabilidad del aprendizaje y velocidad de entrenamiento.
+
+# 2.7. Entrenamiento
+
+El agente fue entrenado durante **1.000 episodios**.
+
+Durante el entrenamiento se almacenó la recompensa acumulada obtenida en cada episodio y se realizó seguimiento de la evolución del valor de epsilon.
+
+Al inicio del entrenamiento se observaron recompensas predominantemente negativas. Posteriormente, el agente comenzó a mejorar progresivamente su desempeño, alcanzando recompensas positivas y superiores a 200 en diferentes etapas del entrenamiento.
+
+La mejor recompensa individual obtenida durante el entrenamiento fue de **303.47**, mientras que la recompensa promedio considerando los 1.000 episodios fue de **53.26**.
+
+La gráfica de evolución de la recompensa muestra una tendencia general de mejora, aunque con fluctuaciones importantes entre episodios.
+
+# 2.8. Resultados y evaluación
+
+Después del entrenamiento se realizó una evaluación independiente utilizando **100 episodios**, sin exploración aleatoria. Durante esta etapa el agente seleccionó en cada estado la acción con mayor valor Q estimado por la red.
+
+Los resultados fueron:
+
+| Métrica | Resultado |
+|---|---:|
+| Episodios evaluados | 100 |
+| Recompensa promedio | **190.87** |
+| Desviación estándar | **118.31** |
+| Episodios con recompensa ≥ 200 | **70/100 (70%)** |
+| Mejor recompensa | **290.87** |
+| Peor recompensa | **-183.08** |
+
+El agente alcanzó una recompensa igual o superior a 200 en el **70% de los episodios evaluados**.
+
+La recompensa promedio de 190.87 se encuentra ligeramente por debajo del umbral de 200 utilizado como referencia para considerar resuelto el ambiente. Sin embargo, el porcentaje de episodios que supera dicho valor evidencia que el agente aprendió una política capaz de obtener un buen desempeño en una proporción importante de las evaluaciones.
+
+La desviación estándar de 118.31 muestra una variabilidad considerable entre episodios. Aunque la mayoría de los resultados se encuentran en rangos altos, también se presentaron algunos episodios con recompensas bajas o negativas.
+
+# 2.9. Reflexión sobre los resultados
+
+Los resultados muestran que el agente logró aprender progresivamente una estrategia para controlar la nave en `LunarLander-v3`.
+
+Una de las principales evidencias de aprendizaje es la evolución de la recompensa durante los 1.000 episodios. El entrenamiento comenzó con recompensas predominantemente negativas y posteriormente alcanzó valores positivos y superiores a 200 en diferentes etapas.
+
+La evaluación sobre 100 episodios mostró que el agente consiguió superar el umbral de 200 en 70 episodios. Esto indica que la política aprendida es efectiva en una proporción significativa de los casos.
+
+Sin embargo, el desempeño no fue completamente estable. La desviación estándar de 118.31 y la presencia de episodios con recompensas negativas muestran que el agente todavía puede presentar fallos durante el aterrizaje.
+
+Entre los posibles factores se encuentran la complejidad de controlar simultáneamente la posición, velocidad, orientación y uso de los motores, así como la sensibilidad de la recompensa ante pequeñas variaciones en la trayectoria.
+
+Como posibles mejoras futuras se podrían explorar diferentes arquitecturas de red, tasas de aprendizaje, estrategias de actualización de la Target Network y técnicas avanzadas como Double DQN o Dueling DQN.
+
+# 2.10. Dificultades encontradas
+
+Durante la implementación fue necesario integrar correctamente los diferentes componentes del algoritmo DQN, especialmente la Q-Network, la Target Network y el Replay Buffer.
+
+También fue necesario ajustar el comportamiento de la política epsilon-greedy para permitir suficiente exploración al inicio del entrenamiento y aumentar progresivamente la explotación de la política aprendida.
+
+Otra dificultad estuvo relacionada con la variabilidad propia del ambiente `LunarLander-v3`. A pesar de que el agente logró obtener recompensas superiores a 200 en numerosos episodios, también se presentaron episodios con resultados considerablemente menores.
+
+Esto permitió identificar que un buen desempeño promedio no garantiza que el agente tenga un comportamiento completamente estable en todas las ejecuciones.
 
 # 3. Entrenamiento y ajuste de hiperparámetros
 
