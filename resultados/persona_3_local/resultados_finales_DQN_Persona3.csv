@@ -1,0 +1,4 @@
+﻿Ambiente,Algoritmo,Semilla,Episodios_entrenamiento,Learning_rate,Evaluaciones,Recompensa_media,Desviacion_estandar,Mediana,Recompensa_minima,Recompensa_maxima,Porcentaje_recompensa_200
+LunarLander-v3,DQN,42,1000,0.001,100,107.07,160.32,170.96,-117.96,315.22,49.0
+LunarLander-v3,DQN,123,1000,0.001,100,116.61,209.64,242.2,-422.75,305.23,62.0
+LunarLander-v3,DQN,2026,1000,0.001,100,99.29,153.55,20.52,-122.03,291.75,47.0
