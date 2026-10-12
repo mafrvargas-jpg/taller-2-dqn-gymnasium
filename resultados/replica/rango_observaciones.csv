@@ -1,0 +1,10 @@
+,declarado,declarado,al azar (500 episodios),al azar (500 episodios),al azar (500 episodios),al azar (500 episodios),agente final (100 episodios),agente final (100 episodios),agente final (100 episodios),agente final (100 episodios)
+,mínimo declarado,máximo declarado,mínimo,percentil 1,percentil 99,máximo,mínimo,percentil 1,percentil 99,máximo
+posición x,-2.5,2.5,-1.0193368,-0.7660022,0.84224236,1.0177977,-1.0069566,-0.59731793,0.27242255,0.3061921
+posición y,-2.5,2.5,-0.3894752,-0.074750885,1.603369,1.7864032,-0.28339168,-0.034594744,1.487484,1.5499816
+velocidad x,-10.0,10.0,-1.9488628,-1.2549406,1.4107746,2.2947192,-1.106178,-0.757614,0.51110554,0.6538476
+velocidad y,-10.0,10.0,-2.1234398,-1.5752773,0.3646104,0.5856197,-0.8990785,-0.74472696,0.15126319,0.47755507
+ángulo,-6.2831855,6.2831855,-3.4004908,-1.663187,1.3802011,3.931435,-0.52445376,-0.41702464,0.3398208,0.42642418
+velocidad angular,-10.0,10.0,-8.785364,-1.340368,1.5126544,7.2946596,-1.030396,-0.3280253,0.31996226,1.1990983
+contacto pata izquierda,-0.0,1.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,1.0
+contacto pata derecha,-0.0,1.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0,1.0
